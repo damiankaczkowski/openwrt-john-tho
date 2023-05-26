@@ -110,6 +110,7 @@ case "$FIRMWARE" in
 		caldata_valid "202f" || caldata_extract "ART" 0x1000 0x2f20
 		;;
 	mikrotik,cap-ac |\
+	mikrotik,d23-dk |\
 	mikrotik,hap-ac2 |\
 	mikrotik,hap-ac3 |\
 	mikrotik,hap-ac3-lte6-kit |\
@@ -205,6 +206,7 @@ case "$FIRMWARE" in
 		caldata_valid "202f" || caldata_extract "ART" 0x5000 0x2f20
 		;;
 	mikrotik,cap-ac |\
+	mikrotik,d23-dk |\
 	mikrotik,hap-ac2 |\
 	mikrotik,hap-ac3 |\
 	mikrotik,hap-ac3-lte6-kit |\
@@ -244,6 +246,7 @@ case "$FIRMWARE" in
 "ath10k/QCA4019/hw1.0/board-ahb-a000000.wifi.bin")
 	case "$board" in
 	mikrotik,cap-ac |\
+	mikrotik,d23-dk |\
 	mikrotik,hap-ac2 |\
 	mikrotik,hap-ac3 |\
 	mikrotik,hap-ac3-lte6-kit |\
@@ -259,6 +262,7 @@ case "$FIRMWARE" in
 "ath10k/QCA4019/hw1.0/board-ahb-a800000.wifi.bin")
 	case "$board" in
 	mikrotik,cap-ac |\
+	mikrotik,d23-dk |\
 	mikrotik,hap-ac2 |\
 	mikrotik,hap-ac3 |\
         mikrotik,hap-ac3-lte6-kit |\
