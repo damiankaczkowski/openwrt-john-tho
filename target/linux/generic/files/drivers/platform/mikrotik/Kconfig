@@ -15,4 +15,13 @@ config MIKROTIK_RB_SYSFS
 	help
 	  This driver exposes RouterBoot configuration in sysfs.
 
+config MIKROTIK_RB_SYSFS_WLAN_LZ77
+	tristate "RouterBoot sysfs WLAN BRD LZ77 decode support"
+	depends on MIKROTIK_RB_SYSFS
+	help
+	  Include the capability to decode wireless board data from
+	  Mikrotik's LZ77 format. This was first seen in 2021.
+	  Likely required if device is using RouterBOOT v7 for backup bootloader,
+	  or was recently calibrated (example: US radio limits).
+
 endif # MIKROTIK
