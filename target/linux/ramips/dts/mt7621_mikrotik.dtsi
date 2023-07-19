@@ -51,7 +51,7 @@
 					label = "hard_config";
 					reg = <0xf000 0x1000>;
 					read-only;
-					compatible = "nvmem-cells";
+					//compatible = "nvmem-cells";
 
 					nvmem-layout {
 						/*
@@ -83,7 +83,7 @@
 				soft_config: partition@20000 {
 					label = "soft_config";
 					reg = <0x20000 0x1000>;
-					compatible = "nvmem-cells";
+					//compatible = "nvmem-cells";
 
 					nvmem-layout {
 						compatible = "mikrotik,tlv-layout";
