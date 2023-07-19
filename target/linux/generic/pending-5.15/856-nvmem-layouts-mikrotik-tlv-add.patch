@@ -1,0 +1,25 @@
+--- a/drivers/nvmem/layouts/Kconfig
++++ b/drivers/nvmem/layouts/Kconfig
+@@ -11,6 +11,14 @@ config NVMEM_LAYOUT_SL28_VPD
+ 
+ 	  If unsure, say N.
+ 
++config NVMEM_LAYOUT_MIKROTIK_TLV
++	tristate "Mikrotik config tlv support"
++	help
++	  Say Y here if you want to support the Mikrotik factory
++	  hard_config and firmware soft_config Type-Length-Value data.
++
++	  If unsure, say N.
++
+ config NVMEM_LAYOUT_ONIE_TLV
+ 	tristate "ONIE tlv support"
+ 	select CRC32
+--- a/drivers/nvmem/layouts/Makefile
++++ b/drivers/nvmem/layouts/Makefile
+@@ -4,4 +4,5 @@
+ #
+ 
+ obj-$(CONFIG_NVMEM_LAYOUT_SL28_VPD) += sl28vpd.o
++obj-$(CONFIG_NVMEM_LAYOUT_MIKROTIK_TLV) += mikrotik-tlv.o
+ obj-$(CONFIG_NVMEM_LAYOUT_ONIE_TLV) += onie-tlv.o
