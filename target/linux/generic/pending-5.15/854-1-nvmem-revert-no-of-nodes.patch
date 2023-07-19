@@ -1,0 +1,86 @@
+From:   =?UTF-8?q?Rafa=C5=82=20Mi=C5=82ecki?= <zajec5@gmail.com>
+Subject: [PATCH] Revert "nvmem: add new config option"
+Date:   Tue, 18 Jul 2023 10:48:04 +0200
+Message-Id: <20230718084804.20139-1-zajec5@gmail.com>
+X-Mailer: git-send-email 2.35.3
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Precedence: bulk
+List-ID: <linux-kernel.vger.kernel.org>
+X-Mailing-List: linux-kernel@vger.kernel.org
+
+From: Rafał Miłecki <rafal@milecki.pl>
+
+This reverts commit 517f14d9cf3533d5ab4fded195ab6f80a92e378f.
+
+It seems that "no_of_node" config option was added to help mtd's case.
+
+DT nodes of MTD partitions (that are also NVMEM devices) may contain
+subnodes that SHOULD NOT be treated as NVMEM fixed cells. To prevent
+NVMEM core code from parsing them "no_of_node" was set to true and that
+made for_each_child_of_node() in NVMEM a no-op.
+
+With the introduction of "add_legacy_fixed_of_cells" config option
+things got more explicit. MTD subsystem simply tells NVMEM when to look
+for fixed cells and there is no need to hack "of_node" pointer anymore.
+
+Signed-off-by: Rafał Miłecki <rafal@milecki.pl>
+---
+Important: this is based on top of the
+[PATCH V4] nvmem: add explicit config option to read old syntax fixed OF cells
+---
+ drivers/mtd/mtdcore.c          | 1 -
+ drivers/nvmem/core.c           | 2 +-
+ include/linux/nvmem-provider.h | 2 --
+ 3 files changed, 1 insertion(+), 4 deletions(-)
+
+diff --git a/drivers/mtd/mtdcore.c b/drivers/mtd/mtdcore.c
+index 9db8d7853639..3d781ffb8c32 100644
+--- a/drivers/mtd/mtdcore.c
++++ b/drivers/mtd/mtdcore.c
+@@ -554,7 +554,6 @@ static int mtd_nvmem_add(struct mtd_info *mtd)
+ 	config.read_only = true;
+ 	config.root_only = true;
+ 	config.ignore_wp = true;
+-	config.no_of_node = !of_device_is_compatible(node, "nvmem-cells");
+ 	config.priv = mtd;
+ 
+ 	mtd->nvmem = nvmem_register(&config);
+diff --git a/drivers/nvmem/core.c b/drivers/nvmem/core.c
+index 58d8919e6682..a0c9153cda28 100644
+--- a/drivers/nvmem/core.c
++++ b/drivers/nvmem/core.c
+@@ -1027,7 +1027,7 @@ struct nvmem_device *nvmem_register(const struct nvmem_config *config)
+ 	nvmem->nkeepout = config->nkeepout;
+ 	if (config->of_node)
+ 		nvmem->dev.of_node = config->of_node;
+-	else if (!config->no_of_node)
++	else
+ 		nvmem->dev.of_node = config->dev->of_node;
+ 
+ 	switch (config->id) {
+diff --git a/include/linux/nvmem-provider.h b/include/linux/nvmem-provider.h
+index 1b81adebdb8b..e3930835235b 100644
+--- a/include/linux/nvmem-provider.h
++++ b/include/linux/nvmem-provider.h
+@@ -89,7 +89,6 @@ struct nvmem_cell_info {
+  * @read_only:	Device is read-only.
+  * @root_only:	Device is accessibly to root only.
+  * @of_node:	If given, this will be used instead of the parent's of_node.
+- * @no_of_node:	Device should not use the parent's of_node even if it's !NULL.
+  * @reg_read:	Callback to read data.
+  * @reg_write:	Callback to write data.
+  * @size:	Device size.
+@@ -122,7 +121,6 @@ struct nvmem_config {
+ 	bool			ignore_wp;
+ 	struct nvmem_layout	*layout;
+ 	struct device_node	*of_node;
+-	bool			no_of_node;
+ 	nvmem_reg_read_t	reg_read;
+ 	nvmem_reg_write_t	reg_write;
+ 	int	size;
+-- 
+2.35.3
+
+
