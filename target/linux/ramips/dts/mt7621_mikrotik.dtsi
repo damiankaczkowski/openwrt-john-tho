@@ -7,7 +7,7 @@
 
 / {
 	chosen {
-		bootargs = "console=ttyS0,115200 mtk_soc_eth.dyndbg=\"+p\" sfp.dyndbg=\"+p\" at803x.dyndbg=\"+p\" dyndbg=\"file drivers/platform/mikrotik/* +p\"";
+		bootargs = "console=ttyS0,115200 mtk_soc_eth.dyndbg=\"+p\" sfp.dyndbg=\"+p\" at803x.dyndbg=\"+p\" dyndbg=\"file drivers/platform/mikrotik/* +p\" dyndbg=\"file drivers/nvmem/* +p\"";
 	};
 
 	keys: keys {
@@ -54,6 +54,7 @@
 					compatible = "nvmem-cells";
 
 					nvmem-layout {
+						/*
 						compatible = "fixed-layout";
 						#address-cells = <1>;
 						#size-cells = <1>;
@@ -63,6 +64,12 @@
 							reg = <0x10 0x6>;
 							#nvmem-cell-cells = <1>;
 						};
+						*/
+						compatible = "mikrotik,tlv-layout";
+						macaddr_base: mac-address {
+							#nvmem-cell-cells = <1>;
+						};
+
 
 					};
 				};
@@ -76,6 +83,14 @@
 				soft_config: partition@20000 {
 					label = "soft_config";
 					reg = <0x20000 0x1000>;
+					compatible = "nvmem-cells";
+
+					nvmem-layout {
+						compatible = "mikrotik,tlv-layout";
+						booter-version {
+						};
+					};
+
 				};
 
 				partition@30000 {
