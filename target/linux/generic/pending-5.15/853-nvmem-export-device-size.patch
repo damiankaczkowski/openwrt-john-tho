@@ -1,0 +1,77 @@
+From:   =?UTF-8?q?Rafa=C5=82=20Mi=C5=82ecki?= <zajec5@gmail.com>
+Subject: [PATCH 2/3] nvmem: core: export nvmem device size
+Date:   Tue, 18 Jul 2023 18:06:51 +0200
+Message-Id: <20230718160652.26756-2-zajec5@gmail.com>
+X-Mailer: git-send-email 2.35.3
+In-Reply-To: <20230718160652.26756-1-zajec5@gmail.com>
+References: <20230718160652.26756-1-zajec5@gmail.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Precedence: bulk
+List-ID: <linux-kernel.vger.kernel.org>
+X-Mailing-List: linux-kernel@vger.kernel.org
+
+From: Michael Walle <michael@walle.cc>
+
+Export the size of the nvmem device. NVMEM layout drivers might need it
+and might not have access to the device which is registering the NVMEM
+device.
+
+Signed-off-by: Michael Walle <michael@walle.cc>
+---
+ drivers/nvmem/core.c           | 13 +++++++++++++
+ include/linux/nvmem-consumer.h |  6 ++++++
+ 2 files changed, 19 insertions(+)
+
+diff --git a/drivers/nvmem/core.c b/drivers/nvmem/core.c
+index a0c9153cda28..57ccd4422e01 100644
+--- a/drivers/nvmem/core.c
++++ b/drivers/nvmem/core.c
+@@ -2224,6 +2224,19 @@ const char *nvmem_dev_name(struct nvmem_device *nvmem)
+ }
+ EXPORT_SYMBOL_GPL(nvmem_dev_name);
+ 
++/**
++ * nvmem_device_size() - Get the size of a given nvmem device.
++ *
++ * @nvmem: nvmem device.
++ *
++ * Return: size of the nvmem device.
++ */
++size_t nvmem_device_size(struct nvmem_device *nvmem)
++{
++	return nvmem->size;
++}
++EXPORT_SYMBOL_GPL(nvmem_device_size);
++
+ static int __init nvmem_init(void)
+ {
+ 	return bus_register(&nvmem_bus_type);
+diff --git a/include/linux/nvmem-consumer.h b/include/linux/nvmem-consumer.h
+index fa030d93b768..3270ad81e140 100644
+--- a/include/linux/nvmem-consumer.h
++++ b/include/linux/nvmem-consumer.h
+@@ -77,6 +77,7 @@ ssize_t nvmem_device_cell_read(struct nvmem_device *nvmem,
+ 			   struct nvmem_cell_info *info, void *buf);
+ int nvmem_device_cell_write(struct nvmem_device *nvmem,
+ 			    struct nvmem_cell_info *info, void *buf);
++size_t nvmem_device_size(struct nvmem_device *nvmem);
+ 
+ const char *nvmem_dev_name(struct nvmem_device *nvmem);
+ 
+@@ -206,6 +207,11 @@ static inline int nvmem_device_write(struct nvmem_device *nvmem,
+ 	return -EOPNOTSUPP;
+ }
+ 
++static inline size_t nvmem_device_size(struct nvmem_device *nvmem)
++{
++	return 0;
++}
++
+ static inline const char *nvmem_dev_name(struct nvmem_device *nvmem)
+ {
+ 	return NULL;
+-- 
+2.35.3
+
+
