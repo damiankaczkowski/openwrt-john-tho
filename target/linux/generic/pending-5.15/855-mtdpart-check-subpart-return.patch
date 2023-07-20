@@ -1,0 +1,40 @@
+From: =?UTF-8?q?Rafa=C5=82=20Mi=C5=82ecki?= <zajec5@gmail.com>
+Subject: [PATCH] mtd: mtdpart: check for subpartitions parsing result
+Date: Tue, 18 Jul 2023 15:49:27 +0200
+Message-Id: <20230718134927.10047-1-zajec5@gmail.com>
+List-Id: Linux MTD discussion mailing list <linux-mtd.lists.infradead.org>
+
+From: Rafał Miłecki <rafal@milecki.pl>
+
+parse_mtd_partitions() may return an error so it should be checked and
+optionally passed up
+
+Signed-off-by: Rafał Miłecki <rafal@milecki.pl>
+---
+ drivers/mtd/mtdpart.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mtd/mtdpart.c b/drivers/mtd/mtdpart.c
+index 23483db8f30c..f43b5342992a 100644
+--- a/drivers/mtd/mtdpart.c
++++ b/drivers/mtd/mtdpart.c
+@@ -426,7 +426,11 @@ int add_mtd_partitions(struct mtd_info *parent,
+ 		mtd_add_partition_attrs(child);
+ 
+ 		/* Look for subpartitions */
+-		parse_mtd_partitions(child, parts[i].types, NULL);
++		ret = parse_mtd_partitions(child, parts[i].types, NULL);
++		if (ret < 0) {
++			pr_err("Failed to parse subpartitions: %d\n", ret);
++			goto err_del_partitions;
++		}
+ 
+ 		cur_offset = child->part.offset + child->part.size;
+ 	}
+-- 
+2.35.3
+
+
+______________________________________________________
+Linux MTD discussion mailing list
+http://lists.infradead.org/mailman/listinfo/linux-mtd/
