@@ -23,13 +23,85 @@ enum mikrotik_tlv_type {
 	MIKROTIK_TLV_ERD = (('D') | ('R' << 8) | ('E' << 16)),
 };
 
-/*
 enum mikrotik_tlv_hard {
+	//RB_HARD_ID_UNKNOWN		= 0x01,
+	RB_HARD_ID_FLASH_INFO		= 0x03,
+	RB_HARD_ID_MAC_ADDRESS_PACK	= 0x04,
+	RB_HARD_ID_BOARD_PRODUCT_CODE	= 0x05,
+	RB_HARD_ID_BIOS_VERSION		= 0x06,
+	RB_HARD_ID_SDRAM_TIMINGS	= 0x08,
+	RB_HARD_ID_DEVICE_TIMINGS	= 0x09,
+	RB_HARD_ID_SOFTWARE_ID		= 0x0a,
+	RB_HARD_ID_SERIAL_NUMBER	= 0x0b,
+	RB_HARD_ID_MEMORY_SIZE		= 0x0d,
+	RB_HARD_ID_MAC_ADDRESS_COUNT	= 0x0e,
+	//RB_HARD_ID_UNKNOWN		= 0x12,
+	//RB_HARD_ID_UNKNOWN		= 0x13,
+	//RB_HARD_ID_UNKNOWN		= 0x14,
+	RB_HARD_ID_HW_OPTIONS		= 0x15,
+	RB_HARD_ID_WLAN_DATA		= 0x16,
+	RB_HARD_ID_BOARD_IDENTIFIER	= 0x17,
+	//RB_HARD_ID_UNKNOWN		= 0x19,
+	//RB_HARD_ID_UNKNOWN		= 0x1a,
+	//RB_HARD_ID_UNKNOWN		= 0x1b,
+	//RB_HARD_ID_UNKNOWN		= 0x1c,
+	RB_HARD_ID_PRODUCT_NAME		= 0x21,
+	//RB_HARD_ID_UNKNOWN		= 0x23,
+	//RB_HARD_ID_UNKNOWN		= 0x25,
+	RB_HARD_ID_DEFCONF		= 0x26,
+	RB_HARD_ID_BOARD_REVISION	= 0x27,
+	RB_HARD_ID_WLAN_ANTENNAS_GAINS	= 0x28,
+	RB_HARD_ID_MAX,
+};
+
+enum mikrotik_tlv_hard_hwopts {
+	RB_HARD_OPT_NO_UART		= BIT(0),
+	RB_HARD_OPT_HAS_VOLTAGE		= BIT(1),
+	RB_HARD_OPT_HAS_USB		= BIT(2),
+	RB_HARD_OPT_HAS_ATTINY		= BIT(3),
+	RB_HARD_OPT_PULSE_DUTY_CYCLE	= BIT(9),
+	RB_HARD_OPT_NO_NAND		= BIT(14),
+	RB_HARD_OPT_HAS_LCD		= BIT(15),
+	RB_HARD_OPT_HAS_POE_OUT		= BIT(16),
+	RB_HARD_OPT_HAS_uSD		= BIT(17),
+	RB_HARD_OPT_HAS_SIM		= BIT(18),
+	//RB_HARD_OPT_UNKNOWN		= BIT(19),
+	RB_HARD_OPT_HAS_SFP		= BIT(20),
+	RB_HARD_OPT_HAS_WIFI		= BIT(21),
+	RB_HARD_OPT_HAS_TS_FOR_ADC	= BIT(22),
+	//RB_HARD_OPT_UNKNOWN		= BIT(27),
+	RB_HARD_OPT_HAS_PLC		= BIT(29),
+	RB_HARD_OPT_MAX			= BIT(31),
 };
 
 enum mikrotik_tlv_soft {
+	RB_SOFT_ID_UART_SPEED		= 0x01,
+	RB_SOFT_ID_BOOT_DELAY		= 0x02,
+	RB_SOFT_ID_BOOT_DEVICE		= 0x03,
+	RB_SOFT_ID_BOOT_KEY		= 0x04,
+	RB_SOFT_ID_CPU_MODE		= 0x05,
+	RB_SOFT_ID_BIOS_VERSION		= 0x06,
+	//RB_SOFT_ID_UNKNOWN		= 0x07,
+	RB_SOFT_ID_BOOT_PROTOCOL	= 0x09,
+	//RB_SOFT_ID_UNKNOWN		= 0x0a,
+	//RB_SOFT_ID_UNKNOWN		= 0x0b,
+	RB_SOFT_ID_CPU_FREQ_IDX		= 0x0c,
+	RB_SOFT_ID_BOOTER		= 0x0d,
+	RB_SOFT_ID_SILENT_BOOT		= 0x0f,
+	//RB_SOFT_ID_UNKNOWN		= 0x11,
+	//RB_SOFT_ID_UNKNOWN		= 0x15,
+	//RB_SOFT_ID_UNKNOWN		= 0x17,
+	//RB_SOFT_ID_UNKNOWN		= 0x1b,
+	RB_SOFT_ID_PROTECTED		= 0x1f,
+	//RB_SOFT_ID_UNKNOWN		= 0x21,
+	RB_SOFT_ID_MAX			= 0x22,
 };
-*/
+
+enum mikrotik_tlv_erd {
+	RB_ERD_ID_SOLO		= 0x0001,
+	RB_ERD_ID_MULTI_8001	= 0x8001,
+	RB_ERD_ID_MULTI_8201	= 0x8201,
+};
 
 struct mikrotik_tlv_hdr {
 	u8 id[4];
@@ -43,13 +115,13 @@ struct mikrotik_tlv {
 static const char *mikrotik_tlv_hard_cell_name(u8 type)
 {
 	switch (type) {
-	case 0x04:
+	case RB_HARD_ID_MAC_ADDRESS_PACK:
 		return "mac-address";
-	case 0x05:
+	case RB_HARD_ID_BOARD_PRODUCT_CODE:
 		return "part-number";
-	case 0x06:
+	case RB_HARD_ID_BIOS_VERSION:
 		return "backup-booter-version";
-	case 0x0b:
+	case RB_HARD_ID_SERIAL_NUMBER:
 		return "serial-number";
 	case 0x0d:
 		return "memory-size";
@@ -127,10 +199,13 @@ static int mikrotik_tlv_mac_read_cb(void *priv, const char *id, int index,
 static int mikrotik_tlv_crc_is_valid(struct device *dev,
 		struct nvmem_device *nvmem, size_t nvmem_len)
 {
+	u32 *config_data;
+	u8 *crc_ptr;
 	u32 *read_crc;
 	u32 calc_crc, stored_crc;
-	u32 *config_data;
 	int ret;
+
+	nvmem_len = nvmem_device_size(nvmem);
 
 	config_data = kmalloc(nvmem_len, GFP_KERNEL);
 	if (!config_data)
@@ -139,8 +214,8 @@ static int mikrotik_tlv_crc_is_valid(struct device *dev,
 	if (ret != nvmem_len)
 		dev_warn(dev, "Read for CRC was short\n");
 
-
-	read_crc = (u32 *)(config_data + sizeof(struct mikrotik_tlv_hdr));
+	crc_ptr = (u8 *)config_data + sizeof(struct mikrotik_tlv_hdr);
+	read_crc = (u32 *)crc_ptr;
 	stored_crc = *read_crc;
 	dev_dbg(dev, "mem ptr: 0x%px, CRC ptr: %px\n", config_data, read_crc);
 	dev_dbg(dev, "CRC val: %x\n", *read_crc);
@@ -148,15 +223,14 @@ static int mikrotik_tlv_crc_is_valid(struct device *dev,
 	*read_crc = 0;
 	dev_dbg(dev, "CRC val after zero: %x\n", *read_crc);
 	calc_crc = ~crc32(~0, config_data, nvmem_len);
-	//*read_crc = stored_crc;
 	if (stored_crc != calc_crc) {
 		dev_warn(dev, "Invalid CRC read: 0x%08x, expected: 0x%08x\n",
 			stored_crc, calc_crc);
-		return true;
+		ret = -EIO;
+		ret = 0;
 	} else
 		ret = 0;
 
-//crc_fail:
 	kfree(config_data);
 	return ret;
 }
@@ -245,7 +319,11 @@ static int mikrotik_tlv_add_cells(struct device *dev,
 				cell.bytes = tlv.len;
 				cell.raw_len = tlv.len;
 			}
+		} else {
+			cell.bytes = tlv.len;
+			cell.raw_len = tlv.len;
 		}
+
 		cell.np = of_get_child_by_name(layout, cell.name);
 		if (cell.np)
 			dev_dbg(dev, "nvmem cell: %s using OF node: %s\n",
@@ -259,8 +337,9 @@ static int mikrotik_tlv_add_cells(struct device *dev,
 			of_node_put(layout);
 			return ret;
 		}
-		dev_dbg(dev, "add nvmem cell name %s, len %d: %d\n",
+		dev_dbg(dev, "add nvmem cell name %s, offset: 0x%x, len %d: %d\n",
 				cell.name,
+				cell.offset,
 				cell.raw_len,
 				ret);
 
@@ -349,12 +428,17 @@ static int mikrotik_tlv_parse_table(struct device *dev, struct nvmem_device *nvm
 	//u8 *table;
 	int ret;
 	enum mikrotik_tlv_type config_type;
+	const size_t device_size = nvmem_device_size(nvmem);
+	u8 *config_data;
 
 	dev_dbg(dev, "Mikrotik NVMEM TLV parser loading\n");
 
 	ret = nvmem_device_read(nvmem, 0, sizeof(hdr), &hdr);
-	if (ret < 0)
+	if (ret < 0) {
+		dev_err(dev, "Mikrotik config TLV initial read failed: %d\n",
+				ret);
 		return ret;
+	}
 
 	hdr_len = sizeof(hdr.id);
 	config_type = mikrotik_tlv_hdr_is_valid(dev, &hdr);
@@ -364,20 +448,26 @@ static int mikrotik_tlv_parse_table(struct device *dev, struct nvmem_device *nvm
 	} else if (config_type == MIKROTIK_TLV_SOFT)
 		hdr_len += MIKROTIK_TLV_HDR_SOFT_CRC_SZ;
 
+	config_data = kmalloc(device_size, GFP_KERNEL);
+	if (!config_data)
+		return -ENOMEM;
+
+	ret = nvmem_device_read(nvmem, 0, device_size, config_data);
+	if (ret != device_size) {
+		dev_err(dev, "Mikrotik config TLV error reading config data: %d\n",
+				ret);
+		return ret;
+	}
+
 	ret = mikrotik_tlv_add_cells(dev, nvmem, 0,
 			NULL, hdr_len, config_type);
 	if (ret) {
 		dev_err(dev, "add_cells error: %d\n", ret);
 	}
 
-//parse_free:
-	//kfree(table);
+	kfree(config_data);
 
-//parse_err:
-	if (ret)
-		return ret;
-
-	return 0;
+	return ret;
 }
 
 static const struct of_device_id mikrotik_tlv_of_match_table[] = {
